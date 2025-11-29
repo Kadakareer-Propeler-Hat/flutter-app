@@ -1,0 +1,40 @@
+// lib/models/user_model.dart
+class UserModel {
+  final String uid;
+  final String email;
+  final String firstName;
+  final String lastName;
+  final String salarySchedule;
+  final String idImageUrl;
+
+  UserModel({
+    required this.uid,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.salarySchedule,
+    required this.idImageUrl,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      "uid": uid,
+      "email": email,
+      "firstName": firstName,
+      "lastName": lastName,
+      "salarySchedule": salarySchedule,
+      "idImageUrl": idImageUrl,
+    };
+  }
+
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
+      uid: map["uid"],
+      email: map["email"],
+      firstName: map["firstName"],
+      lastName: map["lastName"],
+      salarySchedule: map["salarySchedule"],
+      idImageUrl: map["idImageUrl"],
+    );
+  }
+}
