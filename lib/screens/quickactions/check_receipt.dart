@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:horizonai/components/custom_mainappbar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,16 +13,23 @@ class CheckReceiptScreen extends StatefulWidget {
   State<CheckReceiptScreen> createState() => _CheckReceiptScreenState();
 }
 
-class _CheckReceiptScreenState extends State<CheckReceiptScreen>
-    with SingleTickerProviderStateMixin {
+class _CheckReceiptScreenState extends State<CheckReceiptScreen> {
   File? _imageFile;
   String _extractedText = "";
-  String _analysis = "";
   bool _loading = false;
+
+  // Extracted fields
+  String storeName = "";
+  String dateIssued = "";
+  String totalAmount = "";
+  String verdict = "";
 
   final TextRecognizer _textRecognizer = TextRecognizer();
   final ImagePicker _picker = ImagePicker();
 
+  // ----------------------------------------------------------
+  // PICK IMAGE
+  // ----------------------------------------------------------
   Future<void> _pickImage() async {
     final XFile? file = await _picker.pickImage(source: ImageSource.camera);
     if (file != null) {
@@ -31,6 +38,9 @@ class _CheckReceiptScreenState extends State<CheckReceiptScreen>
     }
   }
 
+  // ----------------------------------------------------------
+  // OCR PROCESSING
+  // ----------------------------------------------------------
   Future<void> _runOCR() async {
     if (_imageFile == null) return;
 
@@ -46,13 +56,16 @@ class _CheckReceiptScreenState extends State<CheckReceiptScreen>
       }
     }
 
-    setState(() => _extractedText = buffer.toString());
+    _extractedText = buffer.toString();
 
     await _callGemini(_extractedText);
   }
 
+  // ----------------------------------------------------------
+  // GEMINI API CALL
+  // ----------------------------------------------------------
   Future<void> _callGemini(String text) async {
-    const apiKey = "AIzaSyB5NqtrPK-A9gjZZ-WCPF4hGYrsOkeWIH8";
+    const apiKey = "YOUR_API_KEY";
 
     final url = Uri.parse(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey",
@@ -61,62 +74,92 @@ class _CheckReceiptScreenState extends State<CheckReceiptScreen>
     final body = {
       "contents": [
         {
+          "role": "user",
           "parts": [
             {
-              "text": "Analyze this receipt text. Determine if authentic, summarize key details, and provide HorizonAI's final verdict (concise):\n$text"
+              "text": """
+Extract the following details from the provided receipt text:
+
+- Store Name
+- Date
+- Total Amount
+- Final Verdict (Genuine or Not)
+
+Respond with PURE JSON ONLY. No explanation, no markdown.
+
+Receipt Text:
+$text
+"""
             }
           ]
         }
-      ]
+      ],
+      "generationConfig": {"temperature": 0.2, "maxOutputTokens": 200}
     };
 
-    final res = await http.post(url,
+    try {
+      final res = await http.post(
+        url,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body));
+        body: jsonEncode(body),
+      );
 
-    if (res.statusCode == 200) {
+      if (res.statusCode != 200) {
+        setState(() => verdict = "Gemini Error: ${res.body}");
+        return;
+      }
+
       final data = jsonDecode(res.body);
-      final output = data["candidates"][0]["content"]["parts"][0]["text"];
-      setState(() => _analysis = output);
-    } else {
-      setState(() => _analysis = "Error calling Gemini: ${res.body}");
+
+      final jsonString = data["candidates"][0]["content"]["parts"][0]["text"];
+
+      final extracted = jsonDecode(jsonString);
+
+      setState(() {
+        storeName = extracted["Store Name"] ?? "Not found";
+        dateIssued = extracted["Date"] ?? "Unknown";
+        totalAmount = extracted["Total Amount"] ?? "Unknown";
+        verdict = extracted["Final Verdict"] ?? "Undetermined";
+      });
+    } catch (e) {
+      setState(() => verdict = "Error: $e");
     }
 
     setState(() => _loading = false);
   }
 
+  // ----------------------------------------------------------
+  // UI
+  // ----------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
-      appBar: AppBar(
-        title: const Text("Check Receipt", style: TextStyle(color: Colors.black87)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        foregroundColor: Colors.black87,
-      ),
+      backgroundColor: const Color(0xFFF4F4F4),
+      appBar: const CustomMainAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCard(
+            _buildSectionCard(
+              title: "Receipt Scanner",
               child: Column(
                 children: [
-                  const Text(
-                    "Receipt Scanner",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
                   const SizedBox(height: 12),
                   _imageFile != null
                       ? ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(_imageFile!, height: 220, fit: BoxFit.cover),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.file(
+                      _imageFile!,
+                      height: 240,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   )
                       : Container(
-                    height: 200,
+                    height: 220,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       color: Colors.grey.shade200,
                     ),
                     child: const Center(
@@ -124,61 +167,113 @@ class _CheckReceiptScreenState extends State<CheckReceiptScreen>
                           style: TextStyle(color: Colors.black45)),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   ElevatedButton(
                     onPressed: _pickImage,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text("Capture Receipt"),
-                  )
+                    style: _buttonStyle(),
+                    child: const Text("Capture Receipt",
+                        style: TextStyle(color: Colors.white)),
+                  ),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
 
-            if (_extractedText.isNotEmpty)
-              _buildCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Extracted Text",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-                    Text(_extractedText, style: const TextStyle(fontSize: 15)),
-                  ],
-                ),
-              ),
-
-            const SizedBox(height: 20),
-
             if (_loading)
-              const Center(child: CircularProgressIndicator()),
-
-            if (_analysis.isNotEmpty)
-              _buildCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("HorizonAI Conclusion",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-                    Text(_analysis, style: const TextStyle(fontSize: 15)),
-                  ],
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(),
                 ),
               ),
+
+            if (!_loading && verdict.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              _paymentCard(
+                icon: Icons.storefront,
+                title: "Store Information",
+                line1: "Store Name: $storeName",
+                line2: "Date: $dateIssued",
+              ),
+              const SizedBox(height: 15),
+              _paymentCard(
+                icon: Icons.receipt_long,
+                title: "Billing Summary",
+                line1: "Total Amount: $totalAmount",
+                line2: "Extracted from AI analysis",
+              ),
+              const SizedBox(height: 15),
+              _paymentCard(
+                icon: Icons.verified,
+                title: "Receipt Status",
+                line1: "Verdict: $verdict",
+                line2: verdict.toLowerCase().contains("genuine")
+                    ? "This appears to be a legitimate receipt."
+                    : "This receipt may not be authentic.",
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCard({required Widget child}) {
+  // ----------------------------------------------------------
+  // CUSTOM CARD
+  // ----------------------------------------------------------
+  Widget _paymentCard({
+    required IconData icon,
+    required String title,
+    required String line1,
+    required String line2,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 26,
+            backgroundColor: Colors.black,
+            child: Icon(icon, color: Colors.white, size: 26),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style:
+                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text(line1, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 2),
+                Text(line2,
+                    style:
+                    TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ----------------------------------------------------------
+  // SECTION CARD
+  // ----------------------------------------------------------
+  Widget _buildSectionCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -187,13 +282,36 @@ class _CheckReceiptScreenState extends State<CheckReceiptScreen>
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.06),
             blurRadius: 8,
-            offset: const Offset(0, 3),
-          )
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
-      child: child,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style:
+              const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+
+  // ----------------------------------------------------------
+  // BUTTON STYLE
+  // ----------------------------------------------------------
+  ButtonStyle _buttonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+      minimumSize: const Size(double.infinity, 48),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
     );
   }
 }

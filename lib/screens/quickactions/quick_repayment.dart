@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
+import 'package:horizonai/components/custom_mainappbar.dart';
 
 class QuickRepaymentScreen extends StatefulWidget {
   const QuickRepaymentScreen({super.key});
@@ -56,7 +57,7 @@ class _QuickRepaymentScreenState extends State<QuickRepaymentScreen> {
   Future<void> generateAIRecommendation() async {
     if (selectedLoan == null) return;
 
-    const apiKey = "AIzaSyB5NqtrPK-A9gjZZ-WCPF4hGYrsOkeWIH8";
+    const apiKey = "YOUR_API_KEY";
 
     final total = (selectedLoan!['computed']['total'] as num).toDouble();
     final remaining =
@@ -131,7 +132,7 @@ Provide a concise recommendation on how this user can minimize interest or repay
       chatMessages.add({"sender": "user", "text": userMessage});
     });
 
-    const apiKey = "AIzaSyB5NqtrPK-A9gjZZ-WCPF4hGYrsOkeWIH8";
+    const apiKey = "YOUR_API_KEY";
 
     final total = (selectedLoan!['computed']['total'] as num).toDouble();
     final remaining =
@@ -209,12 +210,7 @@ Provide a concise and helpful answer.
     final paid = total - remaining;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Back to Home"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-      ),
+        appBar: const CustomMainAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

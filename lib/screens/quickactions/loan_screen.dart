@@ -1,6 +1,6 @@
 // lib/screens/loan_screen.dart
 import 'dart:math';
-
+import 'package:horizonai/components/custom_mainappbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +66,6 @@ class _LoanScreenState extends State<LoanScreen> with SingleTickerProviderStateM
     {"brand": "Sony", "model": "Xperia 1 V", "price": 84999, "desc": "Cinema-grade display and camera tools.", "image": "assets/products/xperia1v.jpg"},
     {"brand": "Motorola", "model": "Edge 40", "price": 24999, "desc": "Clean software and long battery life.", "image": "assets/products/edge40.png"},
   ];
-
 
   @override
   void initState() {
@@ -513,7 +512,7 @@ class _LoanScreenState extends State<LoanScreen> with SingleTickerProviderStateM
     final current = _products[_currentIndex];
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
-      appBar: _topBar(),
+      appBar: const CustomMainAppBar(),
       body: SafeArea(
         child: Column(
           children: [

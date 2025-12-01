@@ -5,6 +5,7 @@ class UserModel {
   final String firstName;
   final String lastName;
   final String salarySchedule;
+  final String salaryIncome;   // ← Added
   final String idImageUrl;
 
   UserModel({
@@ -13,6 +14,7 @@ class UserModel {
     required this.firstName,
     required this.lastName,
     required this.salarySchedule,
+    required this.salaryIncome,   // ← Added
     required this.idImageUrl,
   });
 
@@ -23,6 +25,7 @@ class UserModel {
       "firstName": firstName,
       "lastName": lastName,
       "salarySchedule": salarySchedule,
+      "salaryIncome": salaryIncome,   // ← Added
       "idImageUrl": idImageUrl,
     };
   }
@@ -34,6 +37,7 @@ class UserModel {
       firstName: map["firstName"],
       lastName: map["lastName"],
       salarySchedule: map["salarySchedule"],
+      salaryIncome: map["salaryIncome"],   // ← Added
       idImageUrl: map["idImageUrl"],
     );
   }

@@ -1,6 +1,8 @@
 // lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'signup_screen.dart';
 import 'dashboard_screen.dart';
 
@@ -42,6 +44,65 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      setState(() => loading = true);
+
+      // 1. Start Google Sign-In
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        setState(() => loading = false);
+        return; // user canceled
+      }
+
+      // 2. Get Google Auth Details
+      final GoogleSignInAuthentication googleAuth =
+      await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // 3. Sign into Firebase
+      UserCredential userCred =
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      User? user = userCred.user;
+
+      // 4. Save user to Firestore if first login
+      if (userCred.additionalUserInfo!.isNewUser) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user!.uid)
+            .set({
+          "uid": user.uid,
+          "email": user.email,
+          "firstName": user.displayName?.split(" ").first ?? "",
+          "lastName": user.displayName?.split(" ").length == 2
+              ? user.displayName!.split(" ").last
+              : "",
+          "salarySchedule": "Not Set",
+          "idImageUrl": "none",
+          "createdAt": DateTime.now(),
+        });
+      }
+
+      setState(() => loading = false);
+
+      // 5. Go to Dashboard
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      );
+    } catch (e) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Google Sign-In failed: $e")));
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Continue with Google
               GestureDetector(
-                onTap: () {},
+                onTap: signInWithGoogle,
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 15),
@@ -167,6 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+
 
               const SizedBox(height: 50),
 

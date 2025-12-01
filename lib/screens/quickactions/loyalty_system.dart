@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:horizonai/components/custom_mainappbar.dart';
 
 class LoyaltySystemScreen extends StatefulWidget {
   @override
@@ -109,12 +110,7 @@ class _LoyaltySystemPageState extends State<LoyaltySystemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Loyalty System"),
-        leading: BackButton(),
-        centerTitle: true,
-      ),
-
+      appBar: const CustomMainAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

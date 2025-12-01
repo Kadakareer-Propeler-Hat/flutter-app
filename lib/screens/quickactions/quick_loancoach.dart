@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
+import 'package:horizonai/components/custom_mainappbar.dart';
 
 class QuickLoanCoach extends StatefulWidget {
   final String userId;
@@ -61,7 +62,7 @@ class _QuickLoanCoachState extends State<QuickLoanCoach> {
     required double disposable,
     required double dti,
   }) async {
-    const apiKey = "AIzaSyB5NqtrPK-A9gjZZ-WCPF4hGYrsOkeWIH8";
+    const apiKey = "YOUR_API_KEY";
 
     final prompt = """
 You are a financial advisor AI. 
@@ -133,17 +134,17 @@ IMPORTANT — return valid JSON ONLY, no markdown.
 
   @override
   Widget build(BuildContext context) {
+
     if (loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
+      appBar: const CustomMainAppBar(),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-              const Text("Back to Home", style: TextStyle(fontSize: 16)),
             ]),
             const SizedBox(height: 20),
 

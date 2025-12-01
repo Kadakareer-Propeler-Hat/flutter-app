@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:horizonai/components/custom_mainappbar.dart';
 
 class HorizonAI extends StatefulWidget {
   const HorizonAI({Key? key}) : super(key: key);
@@ -18,7 +19,7 @@ class _HorizonAIState extends State<HorizonAI> {
 
   bool _botTyping = false;
 
-  final String _apiKey = "AIzaSyB5NqtrPK-A9gjZZ-WCPF4hGYrsOkeWIH8";
+  final String _apiKey = "YOUR_API_KEY";
 
   @override
   void initState() {
@@ -151,11 +152,7 @@ If the user asks for their tier, credit limit, credit history, or benefits, resp
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F6F7),
-      appBar: AppBar(
-        backgroundColor: maroon,
-        elevation: 0,
-        title: const Text("Horizon AI", style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
+      appBar: const CustomMainAppBar(),
       body: Column(
         children: [
           Expanded(

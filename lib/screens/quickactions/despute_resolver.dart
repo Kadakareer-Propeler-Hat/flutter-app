@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dispute_details.dart'; // ✅ IMPORTANT: Import your details screen here
+import 'dispute_details.dart';
+import 'package:horizonai/components/custom_mainappbar.dart';// ✅ IMPORTANT: Import your details screen here
 
 class DisputeResolverScreen extends StatelessWidget {
   const DisputeResolverScreen({super.key});
@@ -8,6 +9,7 @@ class DisputeResolverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: const CustomMainAppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

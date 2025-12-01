@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:horizonai/components/custom_mainappbar.dart';
 
 class PaymentNavigator extends StatefulWidget {
   const PaymentNavigator({super.key});
@@ -143,6 +144,7 @@ class _PaymentNavigatorState extends State<PaymentNavigator> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: const CustomMainAppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -150,11 +152,6 @@ class _PaymentNavigatorState extends State<PaymentNavigator> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                const Text("Back to Home", style: TextStyle(fontSize: 16)),
               ]),
               const SizedBox(height: 20),
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:horizonai/components/custom_mainappbar.dart';
 
 class FraudDetectionScreen extends StatelessWidget {
   const FraudDetectionScreen({super.key});
@@ -8,19 +9,7 @@ class FraudDetectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Back to Home",
-          style: TextStyle(color: Colors.black, fontSize: 16),
-        ),
-        centerTitle: false,
-      ),
+      appBar: const CustomMainAppBar(),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

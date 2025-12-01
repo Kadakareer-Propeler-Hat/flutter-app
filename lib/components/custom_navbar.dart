@@ -6,6 +6,7 @@ import 'package:horizonai/screens/quickactions/horizon_ai.dart';
 import 'package:horizonai/screens/quickactions/quick_repayment.dart';
 import 'package:horizonai/screens/quickactions/credit_line.dart';
 import 'package:horizonai/screens/quickactions/check_receipt.dart';
+import 'package:horizonai/screens/quickactions/bills_payment.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int selectedIndex;
@@ -56,6 +57,12 @@ class CustomNavBar extends StatelessWidget {
               icon: LucideIcons.coins,
               label: "Bills\nPay",
               context: context,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BillsPayScreen()),
+                );
+              },
             ),
 
             // ⭐ CENTER NAV ITEM (Ask Horizon)

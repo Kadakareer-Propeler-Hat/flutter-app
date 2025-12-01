@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:horizonai/components/custom_mainappbar.dart';
 
 class CreditLinePage extends StatefulWidget {
   const CreditLinePage({Key? key}) : super(key: key);
@@ -11,6 +12,10 @@ class CreditLinePage extends StatefulWidget {
 
 class _CreditLinePageState extends State<CreditLinePage> {
   bool _isSubmitting = false;
+
+  // Editable credit line
+  final TextEditingController _creditLineController =
+  TextEditingController(text: "15000");
 
   Future<void> _requestIncrease() async {
     final TextEditingController amountController = TextEditingController();
@@ -38,7 +43,7 @@ class _CreditLinePageState extends State<CreditLinePage> {
               final amount = amountController.text.trim();
               if (amount.isEmpty) return;
 
-              Navigator.pop(context); // close dialog
+              Navigator.pop(context);
               await _saveRequest(amount);
             },
           ),
@@ -53,9 +58,7 @@ class _CreditLinePageState extends State<CreditLinePage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    await FirebaseFirestore.instance
-        .collection("credit_requests")
-        .add({
+    await FirebaseFirestore.instance.collection("credit_requests").add({
       "uid": user.uid,
       "requestedAmount": amount,
       "timestamp": Timestamp.now(),
@@ -64,45 +67,31 @@ class _CreditLinePageState extends State<CreditLinePage> {
 
     setState(() => _isSubmitting = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Your request has been submitted.")),
+    // After saving → Show approval waiting overlay
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CreditApprovalWaitingScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    const accent = Color(0xFFE4A32A); // golden color
+    const accent = Color(0xFFE4A32A);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black87),
-              onPressed: () => Navigator.pop(context),
-            ),
-            const Text(
-              "Back to Home",
-              style: TextStyle(color: Colors.black87),
-            ),
-          ],
-        ),
-      ),
+      appBar: const CustomMainAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
             const SizedBox(height: 10),
 
-            /// Icon
             CircleAvatar(
               radius: 40,
               backgroundColor: accent.withOpacity(.25),
-              child: const Icon(Icons.credit_card, size: 40, color: Color(0xFFE4A32A)),
+              child:
+              const Icon(Icons.credit_card, size: 40, color: accent),
             ),
 
             const SizedBox(height: 10),
@@ -126,7 +115,6 @@ class _CreditLinePageState extends State<CreditLinePage> {
 
             const SizedBox(height: 25),
 
-            /// Main Credit Line Card
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(22),
@@ -166,21 +154,30 @@ class _CreditLinePageState extends State<CreditLinePage> {
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
+                      children: [
+                        const Text(
                           "Total Credit Line",
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.white,
-                          ),
+                          style: TextStyle(fontSize: 15, color: Colors.white),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          "\$15,000",
-                          style: TextStyle(
-                            fontSize: 28,
+                        const SizedBox(height: 8),
+
+                        // Editable TextField
+                        TextField(
+                          controller: _creditLineController,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(
+                            fontSize: 26,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            prefixText: "₱ ",
+                            prefixStyle: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -191,7 +188,13 @@ class _CreditLinePageState extends State<CreditLinePage> {
 
                   Center(
                     child: ElevatedButton(
-                      onPressed: _isSubmitting ? null : _requestIncrease,
+                      onPressed: _isSubmitting ? null : () async {
+                        final amount = _creditLineController.text.trim();
+                        if (amount.isEmpty) return;
+
+                        // Save request ONCE using typed credit line
+                        await _saveRequest(amount);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: accent,
@@ -206,10 +209,8 @@ class _CreditLinePageState extends State<CreditLinePage> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                          : const Text(
-                        "Request Credit Increase",
-                        style: TextStyle(fontSize: 16),
-                      ),
+                          : const Text("Request Credit Increase",
+                          style: TextStyle(fontSize: 16)),
                     ),
                   ),
                 ],
@@ -218,32 +219,29 @@ class _CreditLinePageState extends State<CreditLinePage> {
 
             const SizedBox(height: 25),
 
-            /// Dynamic Limits
             _buildFeatureCard(
-              icon: Icons.trending_up,
-              title: "Dynamic Limits",
+              icon: Icons.payment,
+              title: "Flexible Payment Options",
               description:
-              "Your credit line grows as you build trust\nand improve your financial health.",
+              "Choose from multiple payment plans tailored to your budget.",
             ),
 
             const SizedBox(height: 18),
 
-            /// Instant Access
             _buildFeatureCard(
-              icon: Icons.flash_on,
-              title: "Instant Access",
+              icon: Icons.attach_money,
+              title: "Zero Hidden Fees",
               description:
-              "Get quick approval and immediate access\nto your credit when you need it.",
+              "No surprise charges. All payment terms are crystal clear.",
             ),
 
             const SizedBox(height: 18),
 
-            /// Protected Terms
             _buildFeatureCard(
-              icon: Icons.shield_outlined,
-              title: "Protected Terms",
+              icon: Icons.lock,
+              title: "Safe Transactions",
               description:
-              "Transparent rates and terms with built-in\nprotections for your peace of mind.",
+              "Every payment is encrypted and secured by our system.",
             ),
 
             const SizedBox(height: 30),
@@ -292,15 +290,78 @@ class _CreditLinePageState extends State<CreditLinePage> {
                 const SizedBox(height: 6),
                 Text(
                   description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                  ),
+                  style:
+                  const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ------------------ APPROVAL WAITING SCREEN ------------------
+
+class CreditApprovalWaitingScreen extends StatefulWidget {
+  const CreditApprovalWaitingScreen({super.key});
+
+  @override
+  State<CreditApprovalWaitingScreen> createState() =>
+      _CreditApprovalWaitingScreenState();
+}
+
+class _CreditApprovalWaitingScreenState
+    extends State<CreditApprovalWaitingScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fade;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
+
+    _fade = Tween<double>(begin: 0, end: 1).animate(_controller);
+
+    _controller.forward();
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) Navigator.pop(context);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black.withOpacity(.65),
+      body: Center(
+        child: FadeTransition(
+          opacity: _fade,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset("assets/logo/happy.PNG", width: 250, height: 250,),
+              const SizedBox(height: 25),
+              const Text(
+                "wait your request approval...",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
