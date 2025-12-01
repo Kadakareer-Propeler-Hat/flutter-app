@@ -1,0 +1,76 @@
+{
+  "project_info": {
+    "project_number": "465512709100",
+    "project_id": "kadakareer-5d385",
+    "storage_bucket": "kadakareer-5d385.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:465512709100:android:7cc280164a8234ea789ec9",
+        "android_client_info": {
+          "package_name": "com.company.horizon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "465512709100-kcr7g5g2dlo7pummvdjsflbvsmg2h5u9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.company.horizon",
+            "certificate_hash": "449d1dcb363a578b7de1e010286d8c0a90a40e57"
+          }
+        },
+        {
+          "client_id": "465512709100-ffckmbrl32smo5h13l23p2u4ci5nc1et.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAABuRxKkmhwarJra8I3Zk5vSvJhmqpWRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "465512709100-ffckmbrl32smo5h13l23p2u4ci5nc1et.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:465512709100:android:9ee96cf3646d8fe9789ec9",
+        "android_client_info": {
+          "package_name": "com.package.horizonai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "465512709100-ffckmbrl32smo5h13l23p2u4ci5nc1et.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAABuRxKkmhwarJra8I3Zk5vSvJhmqpWRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "465512709100-ffckmbrl32smo5h13l23p2u4ci5nc1et.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
