@@ -42,16 +42,14 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Circle
-              Container(
-                width: 260,
-                height: 260,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE6E6E6),
-                  shape: BoxShape.circle,
+              SizedBox(
+                width: 290,
+                height: 290,
+                child: Image.asset(
+                  'assets/logo/logoo.png', // make sure this path matches your project
+                  fit: BoxFit.contain,
                 ),
               ),
-
-              const SizedBox(height: 30),
 
               const Text(
                 "HorizonAI",
@@ -60,7 +58,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   fontSize: 28,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
                   decorationColor: Colors.white,
                 ),
               ),

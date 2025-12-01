@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import '../models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/user_model.dart';
+import 'login_screens.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -23,7 +24,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   File? idImage;
   final picker = ImagePicker();
-
   bool loading = false;
 
   Future pickImage() async {
@@ -35,6 +35,9 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  // -----------------------------------------------------------
+  // REGISTER USER WITH SUPABASE IMAGE UPLOAD + FIREBASE AUTH
+  // -----------------------------------------------------------
   Future<void> registerUser() async {
     if (idImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -46,7 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       setState(() => loading = true);
 
-      // 1. Create Firebase user
+      // 1. Create Firebase Auth User
       UserCredential cred = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
         email: email.text.trim(),
@@ -55,13 +58,24 @@ class _SignupScreenState extends State<SignupScreen> {
 
       String uid = cred.user!.uid;
 
-      // 2. Upload ID
-      final storageRef =
-      FirebaseStorage.instance.ref("user_ids/$uid-id.jpg");
-      await storageRef.putFile(idImage!);
-      final idUrl = await storageRef.getDownloadURL();
+      // 2. Upload ID to Supabase Storage
+      final supabase = Supabase.instance.client;
+      final fileName = "$uid-id.jpg";
 
-      // 3. Store user info Firestore
+      await supabase.storage.from("user_ids").upload(
+        fileName,
+        idImage!,
+        fileOptions: const FileOptions(
+          cacheControl: '3600',
+          upsert: true,
+        ),
+      );
+
+      // 3. Get Supabase Public URL
+      final idUrl =
+      supabase.storage.from("user_ids").getPublicUrl(fileName);
+
+      // 4. Save data to Firestore
       UserModel user = UserModel(
         uid: uid,
         email: email.text.trim(),
@@ -82,7 +96,10 @@ class _SignupScreenState extends State<SignupScreen> {
         const SnackBar(content: Text("Account created successfully!")),
       );
 
-      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
 
     } catch (e) {
       setState(() => loading = false);
@@ -116,33 +133,26 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 40),
 
-              // First Name + Last Name
+              // First + Last Name
               Row(
                 children: [
-                  Expanded(
-                    child: inputField(firstName, "First Name"),
-                  ),
+                  Expanded(child: inputField(firstName, "First Name")),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: inputField(lastName, "Last Name"),
-                  ),
+                  Expanded(child: inputField(lastName, "Last Name")),
                 ],
               ),
 
               const SizedBox(height: 20),
 
-              // Salary Schedule
               inputField(salarySchedule, "Salary Schedule",
                   icon: Icons.calendar_month_outlined),
 
               const SizedBox(height: 20),
 
-              // Email
               inputField(email, "Email", icon: Icons.email_outlined),
 
               const SizedBox(height: 20),
 
-              // Password
               inputField(password, "Password", password: true),
 
               const SizedBox(height: 30),
@@ -157,7 +167,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: Colors.white54,
-                      style: BorderStyle.solid,
                     ),
                   ),
                   child: Column(
@@ -166,11 +175,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           color: Colors.white, size: 60),
                       const SizedBox(height: 10),
                       Text(
-                        idImage == null
-                            ? "Upload Valid ID"
-                            : "ID Uploaded ✓",
-                        style:
-                        const TextStyle(color: Colors.white, fontSize: 18),
+                        idImage == null ? "Upload Valid ID" : "ID Uploaded ✓",
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 18),
                       ),
                       const SizedBox(height: 8),
                       const Text(
@@ -202,9 +209,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         : const Text(
                       "Create Account",
                       style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold),
+                        fontSize: 18,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -223,8 +231,7 @@ class _SignupScreenState extends State<SignupScreen> {
       obscureText: password,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        prefixIcon:
-        icon != null ? Icon(icon, color: Colors.white) : null,
+        prefixIcon: icon != null ? Icon(icon, color: Colors.white) : null,
         hintText: text,
         hintStyle: const TextStyle(color: Colors.white70),
         enabledBorder: OutlineInputBorder(

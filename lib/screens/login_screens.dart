@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signup_screen.dart';
+import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   bool loading = false;
+  bool obscurePass = true;
 
   Future<void> loginUser() async {
     try {
@@ -26,6 +28,13 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       setState(() => loading = false);
+
+      // Navigate to Dashboard
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      );
+
     } catch (e) {
       setState(() => loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -40,32 +49,28 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: const Color(0xFF8B1538), // maroon
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 50),
+          padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 80),
+            children: [ // smaller top spacing
 
-              const Text(
-                "HorizonAI",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              Center(
+                child: Image.asset(
+                  "assets/logo/branding_name.png",
+                  width: MediaQuery.of(context).size.width * 0.9,  // 80% of screen width
+                  fit: BoxFit.contain,
                 ),
               ),
+              // tighter spacing before email
 
-              const SizedBox(height: 80),
-
-              // Email Textbox
+              // Email
               TextField(
                 controller: emailController,
+                keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.person_outline, color: Colors.white),
+                  prefixIcon: const Icon(Icons.email_outlined, color: Colors.white),
                   hintText: "Email",
                   hintStyle: const TextStyle(color: Colors.white70),
-                  filled: false,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: const BorderSide(color: Colors.white70),
@@ -77,7 +82,38 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 90),
+              const SizedBox(height: 10),
+
+              // Password
+              TextField(
+                controller: passwordController,
+                obscureText: obscurePass,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.lock_outline, color: Colors.white),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      obscurePass ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.white70,
+                    ),
+                    onPressed: () {
+                      setState(() => obscurePass = !obscurePass);
+                    },
+                  ),
+                  hintText: "Password",
+                  hintStyle: const TextStyle(color: Colors.white70),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: Colors.white70),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: Colors.white),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 50),
 
               // Login Button
               GestureDetector(
@@ -104,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 15),
+              const SizedBox(height: 20),
 
               // Continue with Google
               GestureDetector(
@@ -132,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 120),
+              const SizedBox(height: 50),
 
               // Create Account
               Row(
@@ -161,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
 
-              const SizedBox(height: 15),
+              const SizedBox(height: 20),
 
               const Text(
                 "Need Help?",
@@ -171,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
               const Text(
                 "By continuing, you agree to our\nAI-enhanced privacy policy",

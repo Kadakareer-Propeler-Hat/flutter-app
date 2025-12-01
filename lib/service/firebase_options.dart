@@ -1,20 +1,16 @@
 // lib/firebase_options.dart
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get android {
     return const FirebaseOptions(
-      apiKey: "YOUR_ANDROID_API_KEY",
-      appId: "YOUR_ANDROID_APP_ID",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
+      apiKey: "AIzaSyAABuRxKkmhwarJra8I3Zk5vSvJhmqpWRg",
+      appId: "1:465512709100:android:7cc280164a8234ea789ec9",
+      messagingSenderId: "465512709100",
+      projectId: "kadakareer-5d385",
+      storageBucket: "kadakareer-5d385.firebasestorage.app",
     );
   }
 
-  /// Automatically choose Android only
-  static FirebaseOptions get currentPlatform {
-    return android;
-  }
+  static FirebaseOptions get currentPlatform => android;
 }
